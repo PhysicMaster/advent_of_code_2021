@@ -21,7 +21,13 @@ class Map():
         self.connections = connections
         self.cave_names = []
         self.caves = []
-        
+
+        self.paths = [['start']]
+        self.completed_paths = []
+
+        self.alternative_paths = [['start']]
+        self.completed_alternative_paths = []
+
         self.map()
 
     def map(self):
@@ -49,23 +55,52 @@ class Map():
 
     def _find_routes(self):
 
-        paths = [['start']]
-        new_paths = []
-        for path in paths: #ojo que igual lo tengo que hacer pa atrás
-            current_id = self.cave_names.index(path[-1])
-            used_small_caves = [cave for cave in path if not cave.isupper()]
-            possibilities = self.caves[current_id].connections
-            for cave in possibilities:
-                if cave not in used_small_caves:
-                    new_path = path.copy()
-                    new_path.append(cave)
-                    new_paths.append(new_path)
-        print(new_paths)
+        while len(self.paths) != 0:
+            new_paths = []
+            for path in self.paths:
+                current_id = self.cave_names.index(path[-1])
+                used_small_caves = [cave for cave in path if not cave.isupper()]
+                possibilities = self.caves[current_id].connections
+                for cave in possibilities:
+                    if cave == 'end':
+                        complete_path = path.copy()
+                        complete_path.append('end')
+                        self.completed_paths.append(complete_path)
+                    elif cave not in used_small_caves:
+                        new_path = path.copy()
+                        new_path.append(cave)
+                        new_paths.append(new_path)
+            self.paths = new_paths
+
+    def _find_alternative_routes(self):
+
+        while len(self.alternative_paths) != 0:
+            new_paths = []
+            for path in self.alternative_paths: 
+                current_id = self.cave_names.index(path[-1])
+                used_small_caves = [cave for cave in path if not cave.isupper()]
+                possibilities = self.caves[current_id].connections
+                for cave in possibilities:
+                    if cave == 'end':
+                        complete_path = path.copy()
+                        complete_path.append('end')
+                        self.completed_alternative_paths.append(complete_path)
+                    elif len(used_small_caves) != len(set(used_small_caves)):
+                        if cave not in used_small_caves:
+                            new_path = path.copy()
+                            new_path.append(cave)
+                            new_paths.append(new_path)
+                    elif cave != 'start':
+                        new_path = path.copy()
+                        new_path.append(cave)
+                        new_paths.append(new_path)
+            self.alternative_paths = new_paths
 
 
 
 
 archivo = './Inputs/example12.txt'
+archivo = './Inputs/input12.txt'
 
 with open(archivo) as data:
     connections = data.readlines()
@@ -74,4 +109,9 @@ connections = [item.rstrip("\n") for item in connections]
 
 a = Map(connections)
 a._find_routes()
-a._find_routes()
+a._find_alternative_routes()
+
+#print(a.completed_paths)
+print(len(a.completed_paths))
+print(len(a.completed_alternative_paths))
+
